@@ -1,0 +1,61 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans bg-neutral-light text-neutral-dark;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+
+  button, input[type="button"], input[type="submit"] {
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary;
+    /* Add default transition */
+    @apply transition duration-150 ease-in-out;
+  }
+
+  input, select, textarea {
+     @apply focus:ring-primary focus:border-primary border-neutral-medium;
+     @apply transition duration-150 ease-in-out;
+  }
+
+  /* Example: Define a modern-looking base button style */
+  .btn {
+     @apply inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-base font-medium rounded-xl shadow-soft text-white;
+  }
+  .btn-primary {
+     @apply bg-primary hover:bg-primary-dark focus:ring-primary;
+  }
+  .btn-secondary {
+    @apply bg-secondary hover:bg-secondary-dark focus:ring-secondary text-neutral-dark hover:text-white;
+  }
+  .btn-accent {
+    @apply bg-accent hover:bg-accent-dark focus:ring-accent text-neutral-dark hover:text-white;
+  }
+  .btn-outline {
+    @apply bg-transparent border-primary text-primary hover:bg-primary-light focus:ring-primary;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+::-webkit-scrollbar {
+  display: none;
+}
