@@ -1,69 +1,101 @@
 const Subject = require("../../models/Other/subject.model");
 
+// Get all subjects
 const getSubject = async (req, res) => {
     try {
-        let subject = await Subject.find();
-        if (!subject) {
-            return res
-                .status(400)
-                .json({ success: false, message: "No Subject Available" });
-        }
-        const data = {
+        const subjects = await Subject.find();
+        res.status(200).json({
             success: true,
-            message: "All Subject Loaded!",
-            subject,
-        };
-        res.json(data);
+            subject: subjects,
+        });
     } catch (error) {
-        console.error(error.message);
-        console.log(error)
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
     }
-}
+};
 
-const addSubject = async (req, res) => {
-    let { name, code } = req.body;
+// Get subjects by branch and semester
+const getSubjectsByBranchAndSemester = async (req, res) => {
     try {
-        let subject = await Subject.findOne({ code });
-        if (subject) {
-            return res
-                .status(400)
-                .json({ success: false, message: "Subject Already Exists" });
+        const { branch, semester } = req.query;
+        
+        if (!branch || !semester) {
+            return res.status(400).json({
+                success: false,
+                message: "Branch and semester are required",
+            });
         }
-        await Subject.create({
+
+        const subjects = await Subject.find({ branch, semester: parseInt(semester) });
+        res.status(200).json({
+            success: true,
+            subjects,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+// Add a new subject
+const addSubject = async (req, res) => {
+    try {
+        const { name, code, branch, semester } = req.body;
+
+        // Check if subject with same code exists
+        const existingSubject = await Subject.findOne({ code });
+        if (existingSubject) {
+            return res.status(400).json({
+                success: false,
+                message: "Subject with this code already exists",
+            });
+        }
+
+        const subject = new Subject({
             name,
             code,
+            branch,
+            semester: parseInt(semester)
         });
-        const data = {
-            success: true,
-            message: "Subject Added!",
-        };
-        res.json(data);
-    } catch (error) {
-        console.error(error.message);
-        console.log(error)
-        res.status(500).json({ success: false, message: "Internal Server Error" });
-    }
-}
 
+        await subject.save();
+        res.status(201).json({
+            success: true,
+            message: "Subject added successfully",
+            subject,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+// Delete a subject
 const deleteSubject = async (req, res) => {
     try {
-        let subject = await Subject.findByIdAndDelete(req.params.id);
-        if (!subject) {
-            return res
-                .status(400)
-                .json({ success: false, message: "No Subject Exists!" });
-        }
-        const data = {
+        const { id } = req.params;
+        await Subject.findByIdAndDelete(id);
+        res.status(200).json({
             success: true,
-            message: "Subject Deleted!",
-        };
-        res.json(data);
+            message: "Subject deleted successfully",
+        });
     } catch (error) {
-        console.error(error.message);
-        console.log(error)
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
     }
-}
+};
 
-module.exports = { getSubject, addSubject, deleteSubject }
+module.exports = {
+    getSubject,
+    getSubjectsByBranchAndSemester,
+    addSubject,
+    deleteSubject,
+};
