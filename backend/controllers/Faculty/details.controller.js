@@ -22,23 +22,47 @@ const getDetails = async (req, res) => {
 
 const addDetails = async (req, res) => {
     try {
+        // Validate required fields
+        const requiredFields = ['employeeId', 'firstName', 'middleName', 'lastName', 'email', 'phoneNumber', 'department', 'gender', 'experience', 'post'];
+        const missingFields = requiredFields.filter(field => !req.body[field]);
+        
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Missing required fields: ${missingFields.join(', ')}`
+            });
+        }
+
+        // Check if faculty already exists
         let user = await facultyDetails.findOne({ employeeId: req.body.employeeId });
         if (user) {
             return res.status(400).json({
                 success: false,
-                message: "Faculty With This EmployeeId Already Exists",
+                message: "Faculty With This EmployeeId Already Exists"
             });
         }
-        user = await facultyDetails.create({ ...req.body, profile: req.file.filename });
+
+        // Create new faculty with optional profile image
+        const facultyData = {
+            ...req.body,
+            profile: req.file ? req.file.filename : 'default-profile.png' // Use default image if none uploaded
+        };
+        
+        user = await facultyDetails.create(facultyData);
+
         const data = {
             success: true,
-            message: "Faculty Details Added!",
-            user,
+            message: "Faculty Details Added Successfully!",
+            user
         };
         res.json(data);
     } catch (error) {
-        console.log(error)
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+        console.error("Error in addDetails:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Internal Server Error",
+            error: error.message 
+        });
     }
 }
 

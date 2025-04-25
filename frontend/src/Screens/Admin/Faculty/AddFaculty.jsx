@@ -67,7 +67,9 @@ const AddFaculty = () => {
     formData.append("gender", data.gender);
     formData.append("post", data.post);
     formData.append("type", "profile");
-    formData.append("profile", file);
+    if (file) {
+      formData.append("profile", file);
+    }
     axios
       .post(`${baseApiURL()}/faculty/details/addDetails`, formData, {
         headers: headers,

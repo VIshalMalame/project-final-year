@@ -198,36 +198,30 @@ const getStudentAttendance = async (req, res) => {
             };
         } else if (viewType === 'monthly') {
             const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-            const firstDayOfNextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+            const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
             query.date = {
                 $gte: firstDayOfMonth,
-                $lt: firstDayOfNextMonth
+                $lte: lastDayOfMonth
             };
         } else if (viewType === 'semester') {
-            // Assuming semester starts from August
-            const currentMonth = today.getMonth();
-            const currentYear = today.getFullYear();
-            let semesterStart;
-            
-            if (currentMonth >= 7) { // August or later
-                semesterStart = new Date(currentYear, 7, 1); // August 1st
-            } else {
-                semesterStart = new Date(currentYear - 1, 7, 1); // August 1st of previous year
-            }
-            
+            // For semester view, get all records for the current semester
+            const semesterStart = new Date(today.getFullYear(), today.getMonth() - 6, 1); // Assuming 6-month semester
             query.date = {
                 $gte: semesterStart,
                 $lte: today
             };
         }
 
+        // Get attendance records
         const records = await Attendance.find(query)
             .sort('-date')
             .select('date subject attendance');
 
-        // Process the records to get attendance status for the student
+        // Process records to get student-specific attendance
         const processedRecords = records.map(record => {
-            const studentAttendance = record.attendance.find(a => a.enrollmentNo === parseInt(enrollmentNo));
+            const studentAttendance = record.attendance.find(
+                a => a.enrollmentNo === parseInt(enrollmentNo)
+            );
             return {
                 date: record.date,
                 subject: record.subject,
@@ -235,10 +229,12 @@ const getStudentAttendance = async (req, res) => {
             };
         });
 
-        // Calculate attendance statistics
+        // Calculate statistics
         const totalClasses = processedRecords.length;
         const presentClasses = processedRecords.filter(record => record.isPresent).length;
-        const attendancePercentage = totalClasses > 0 ? (presentClasses / totalClasses) * 100 : 0;
+        const attendancePercentage = totalClasses > 0 
+            ? Math.round((presentClasses / totalClasses) * 100) 
+            : 0;
 
         res.json({
             success: true,
@@ -247,7 +243,7 @@ const getStudentAttendance = async (req, res) => {
             statistics: {
                 totalClasses,
                 presentClasses,
-                attendancePercentage: Math.round(attendancePercentage * 100) / 100
+                attendancePercentage
             }
         });
 
