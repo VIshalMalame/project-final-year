@@ -194,67 +194,53 @@ const AddStudent = () => {
         toast.error("Please fill all required fields.");
         return;
     }
-    if (file && !file.type.startsWith("image/")) {
-        toast.error("Invalid profile picture file type.");
-        return;
-    }
+
+    // Convert enrollmentNo and phoneNumber to numbers
+    const formDataToSend = {
+        ...data,
+        enrollmentNo: parseInt(data.enrollmentNo),
+        phoneNumber: data.phoneNumber ? parseInt(data.phoneNumber) : undefined,
+        semester: parseInt(data.semester)
+    };
 
     toast.loading("Adding Student...");
-    const headers = {
-      "Content-Type": "multipart/form-data",
-    };
     const formData = new FormData();
+    
     // Append data fields
-    Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value);
+    Object.entries(formDataToSend).forEach(([key, value]) => {
+        if (value !== undefined && value !== '') {
+            formData.append(key, value);
+        }
     });
-    formData.append("type", "profile");
+
     if (file) {
         formData.append("profile", file);
     }
 
     axios
       .post(`${baseApiURL()}/student/details/addDetails`, formData, {
-        headers: headers,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       })
       .then((response) => {
         toast.dismiss();
         if (response.data.success) {
-          toast.success(response.data.message);
-          // Now register credentials
-          toast.loading("Registering credentials...");
-          axios
-            .post(`${baseApiURL()}/student/auth/register`, {
-              loginid: data.enrollmentNo,
-              password: data.enrollmentNo, // Default password is enrollment number
-            })
-            .then((regResponse) => {
-              toast.dismiss();
-              if (regResponse.data.success) {
-                toast.success(regResponse.data.message);
-                // Reset form
-                setFile(null);
-                setData({
-                  enrollmentNo: "",
-                  firstName: "",
-                  middleName: "",
-                  lastName: "",
-                  email: "",
-                  phoneNumber: "",
-                  semester: "",
-                  branch: "",
-                  gender: "",
-                });
-                setPreviewImage("");
-              } else {
-                toast.error(regResponse.data.message);
-              }
-            })
-            .catch((regError) => {
-              toast.dismiss();
-              console.error("Registration Error:", regError);
-              toast.error(regError.response?.data?.message || "Error registering credentials");
-            });
+          toast.success("Student added successfully!");
+          // Reset form
+          setFile(null);
+          setData({
+            enrollmentNo: "",
+            firstName: "",
+            middleName: "",
+            lastName: "",
+            email: "",
+            phoneNumber: "",
+            semester: "",
+            branch: "",
+            gender: "",
+          });
+          setPreviewImage("");
         } else {
           toast.error(response.data.message);
         }
@@ -262,7 +248,8 @@ const AddStudent = () => {
       .catch((error) => {
         toast.dismiss();
         console.error("Add Student Error:", error);
-        toast.error(error.response?.data?.message || "Error adding student details");
+        const errorMessage = error.response?.data?.message || "Error adding student details";
+        toast.error(errorMessage);
       });
   };
 

@@ -11,7 +11,7 @@ const studentDetails = new mongoose.Schema({
   },
   middleName: {
     type: String,
-    required: true,
+    required: false,
   },
   lastName: {
     type: String,
@@ -23,7 +23,7 @@ const studentDetails = new mongoose.Schema({
   },
   phoneNumber: {
     type: Number,
-    required: true,
+    required: false,
   },
   semester: {
     type: Number,
