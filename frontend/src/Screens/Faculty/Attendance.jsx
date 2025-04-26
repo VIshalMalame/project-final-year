@@ -127,11 +127,11 @@ function Attendance() {
     }
   };
 
-  const handleAttendanceToggle = (enrollmentNo) => {
+  const handleAttendanceToggle = (enrollmentNo, status) => {
     setStudents(prev =>
       prev.map(student =>
         student.enrollmentNo === enrollmentNo
-          ? { ...student, isPresent: !student.isPresent }
+          ? { ...student, isPresent: status }
           : student
       )
     );
@@ -186,6 +186,60 @@ function Attendance() {
     student.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     student.enrollmentNo.toString().includes(searchQuery)
   );
+
+  const renderAttendanceList = () => {
+    if (!students.length) return null;
+
+    return (
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enrollment No</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Attendance</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {students.map((student) => (
+                <tr key={student.enrollmentNo} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {student.enrollmentNo}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {`${student.firstName} ${student.lastName}`}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <div className="flex justify-center space-x-4">
+                      <label className="inline-flex items-center">
+                        <input
+                          type="radio"
+                          className="form-radio h-5 w-5 text-green-600"
+                          checked={student.isPresent === true}
+                          onChange={() => handleAttendanceToggle(student.enrollmentNo, true)}
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Present</span>
+                      </label>
+                      <label className="inline-flex items-center">
+                        <input
+                          type="radio"
+                          className="form-radio h-5 w-5 text-red-600"
+                          checked={student.isPresent === false}
+                          onChange={() => handleAttendanceToggle(student.enrollmentNo, false)}
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Absent</span>
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="w-full p-6 md:p-8 lg:p-10 space-y-8">
@@ -302,47 +356,7 @@ function Attendance() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-neutral-medium">
-                <thead>
-                  <tr className="bg-neutral">
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-neutral-dark uppercase tracking-wider">
-                      Enrollment No
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-neutral-dark uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-neutral-dark uppercase tracking-wider">
-                      Attendance
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-neutral-medium">
-                  {filteredStudents.map((student) => (
-                    <tr key={student.enrollmentNo} className="hover:bg-neutral transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-dark">
-                        {student.enrollmentNo}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-dark">
-                        {`${student.firstName} ${student.lastName}`}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
-                        <button
-                          onClick={() => handleAttendanceToggle(student.enrollmentNo)}
-                          className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${
-                            student.isPresent
-                              ? 'bg-green-100 text-green-600 hover:bg-green-200'
-                              : 'bg-red-100 text-red-600 hover:bg-red-200'
-                          }`}
-                        >
-                          {student.isPresent ? <FiCheck /> : <FiX />}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {renderAttendanceList()}
 
             <div className="flex justify-end pt-6 border-t border-neutral-medium">
               <button

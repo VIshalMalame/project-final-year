@@ -3,21 +3,19 @@ import axios from 'axios';
 import { baseApiURL } from '../../baseUrl';
 import { FiCalendar, FiCheck, FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import { useSelector } from 'react-redux';
 
 const MyAttendance = () => {
   const [viewType, setViewType] = useState('daily');
   const [attendanceData, setAttendanceData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [studentInfo, setStudentInfo] = useState(null);
+  const userData = useSelector((state) => state.userData);
 
   useEffect(() => {
-    // Get student info from localStorage
-    const student = JSON.parse(localStorage.getItem('user'));
-    if (student) {
-      setStudentInfo(student);
-      fetchAttendance(student.loginid);
+    if (userData?.enrollmentNo) {
+      fetchAttendance(userData.enrollmentNo);
     }
-  }, [viewType]);
+  }, [viewType, userData?.enrollmentNo]);
 
   const fetchAttendance = async (enrollmentNo) => {
     try {
