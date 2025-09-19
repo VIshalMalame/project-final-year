@@ -62,7 +62,7 @@ const Login = () => {
               {selected} Login ID
             </label>
             <input
-              type="number"
+              type="text"
               id="eno"
               required
               className="bg-white outline-none border-2 border-gray-400 py-2 px-4 rounded-md w-full focus:border-blue-500"
